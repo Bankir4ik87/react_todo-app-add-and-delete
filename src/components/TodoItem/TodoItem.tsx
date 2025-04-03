@@ -1,12 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { Todo } from '../../types/Todo';
 import classNames from 'classnames';
 import { deleteTodo } from '../../api/todos';
@@ -18,44 +12,20 @@ type TodoProps = {
 };
 
 const TodoItem: React.FC<TodoProps> = ({ todo }) => {
-  const context = useContext(MainContext);
-  const { todos, setTodos, setError, loadingIds } = context;
+  const { todos, setTodos, setError, loadingIds } = useContext(MainContext);
 
   const { id, title, completed } = todo;
 
-  const [todoState, setTodoState] = useState({
-    isEdited: false,
-    editedValue: title,
-    completed: completed,
-  });
-
-  const isLoading = useRef(loadingIds.some(x => x === id));
-
-  if (isLoading.current) {
-    setTimeout(() => (isLoading.current = false), 3000);
-  }
-
-  useEffect(() => {
-    const cleanInputFocus = (event: MouseEvent) => {
-      const element = event.target as HTMLElement;
-
-      if (element.dataset.cy !== 'TodoTitleField') {
-        setTodoState({ ...todoState, isEdited: false });
-      }
-    };
-
-    document.addEventListener('click', cleanInputFocus);
-
-    return () => {
-      document.removeEventListener('click', cleanInputFocus);
-    };
-  }, [todoState]);
+  const [isEdited, setIsEdited] = useState(false);
+  const [editedValue, setEditedValue] = useState(title);
+  const [isCompleted, setIsCompleted] = useState(completed);
+  const [isLoading, setIsLoading] = useState(loadingIds.some(x => x === id));
 
   const handleDeleteClick = useCallback(
     (event: React.MouseEvent) => {
       event.preventDefault();
 
-      isLoading.current = true;
+      setIsLoading(true);
       deleteTodo(id)
         .then(() => {
           setTodos(todos.filter(task => task.id !== id));
@@ -65,44 +35,53 @@ const TodoItem: React.FC<TodoProps> = ({ todo }) => {
     [id, todos, setError, setTodos],
   );
 
+  const handleCheckboxChange = () => {
+    setIsCompleted(prev => !prev);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditedValue(e.target.value);
+  };
+
+  const handleDoubleClick = () => {
+    setIsEdited(true);
+  };
+
   return (
     <div
       key={id}
       data-cy="Todo"
-      className={`todo ${todoState.completed ? 'completed' : ''}`}
+      className={`todo ${isCompleted ? 'completed' : ''}`}
     >
       <label className="todo__status-label">
         <input
           data-cy="TodoStatus"
           type="checkbox"
           className="todo__status"
-          defaultChecked={todoState.completed}
-          onClick={() =>
-            setTodoState({ ...todoState, completed: !todoState.completed })
-          }
+          checked={isCompleted}
+          onChange={handleCheckboxChange}
         />
       </label>
 
-      {todoState.isEdited ? (
+      {isEdited ? (
         <form>
           <input
             data-cy="TodoTitleField"
             type="text"
             className="todo__title-field"
             placeholder="Empty todo will be deleted"
-            value={todoState.editedValue}
-            onChange={e =>
-              setTodoState({ ...todoState, editedValue: e.target.value })
-            }
+            value={editedValue}
+            onChange={handleInputChange}
+            onBlur={() => setIsEdited(false)}
           />
         </form>
       ) : (
         <span
           data-cy="TodoTitle"
           className="todo__title"
-          onDoubleClick={() => setTodoState({ ...todoState, isEdited: true })}
+          onDoubleClick={handleDoubleClick}
         >
-          {todoState.editedValue}
+          {editedValue}
         </span>
       )}
 
@@ -120,7 +99,7 @@ const TodoItem: React.FC<TodoProps> = ({ todo }) => {
       <div
         data-cy="TodoLoader"
         className={classNames('modal overlay', {
-          'is-active': isLoading.current,
+          'is-active': isLoading,
         })}
       >
         <div className="modal-background has-background-white-ter" />

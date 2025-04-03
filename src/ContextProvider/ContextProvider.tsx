@@ -17,7 +17,7 @@ type MainContextType = {
 };
 
 export const MainContext = createContext<MainContextType>({
-  filter: 'FilterLinkAll',
+  filter: Filter.FilterLinkAll,
   setFilter: () => {},
   loadingIds: [],
   setLoadingIds: () => {},
@@ -38,7 +38,7 @@ export const MainContext = createContext<MainContextType>({
 });
 
 const MainContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [filter, setFilter] = useState<Filter>('FilterLinkAll');
+  const [filter, setFilter] = useState<Filter>(Filter.FilterLinkAll);
   const [loadingIds, setLoadingIds] = useState([0]);
 
   const [todos, setTodos] = useState<Todo[]>([]);

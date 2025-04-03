@@ -6,17 +6,22 @@ import { deleteTodo } from '../../api/todos';
 import callError from '../../utils/callError';
 
 const Footer: React.FC = () => {
-  const context = useContext(MainContext);
   const { todos, setTodos, filter, setFilter, setError, setLoadingIds } =
-    context;
+    useContext(MainContext);
 
   const isClearDisabled = !todos.some(todo => todo.completed);
 
   const handleFilterClick = useCallback(
-    (event: React.MouseEvent): void => {
-      const element = event.target as HTMLElement;
+    (event: React.MouseEvent<HTMLAnchorElement>): void => {
+      const element = event.currentTarget;
+      const filterValue = element.getAttribute('data-filter');
 
-      setFilter(element.dataset.cy as Filter);
+      if (
+        filterValue &&
+        Object.values(Filter).includes(filterValue as Filter)
+      ) {
+        setFilter(filterValue as Filter);
+      }
     },
     [setFilter],
   );
@@ -45,6 +50,12 @@ const Footer: React.FC = () => {
 
   const activeNumbers = todos.filter(todo => !todo.completed).length;
 
+  const filters = [
+    { label: 'All', value: Filter.FilterLinkAll },
+    { label: 'Active', value: Filter.FilterLinkActive },
+    { label: 'Completed', value: Filter.FilterLinkCompleted },
+  ];
+
   return (
     <footer className="todoapp__footer" data-cy="Footer">
       <span className="todo-count" data-cy="TodosCounter">
@@ -53,38 +64,20 @@ const Footer: React.FC = () => {
 
       {/* Active link should have the 'selected' class */}
       <nav className="filter" data-cy="Filter">
-        <a
-          href="#/"
-          className={classNames('filter__link', {
-            selected: filter === 'FilterLinkAll',
-          })}
-          data-cy="FilterLinkAll"
-          onClick={handleFilterClick}
-        >
-          All
-        </a>
-
-        <a
-          href="#/active"
-          className={classNames('filter__link', {
-            selected: filter === 'FilterLinkActive',
-          })}
-          data-cy="FilterLinkActive"
-          onClick={handleFilterClick}
-        >
-          Active
-        </a>
-
-        <a
-          href="#/completed"
-          className={classNames('filter__link', {
-            selected: filter === 'FilterLinkCompleted',
-          })}
-          data-cy="FilterLinkCompleted"
-          onClick={handleFilterClick}
-        >
-          Completed
-        </a>
+        {filters.map(({ label, value }) => (
+          <a
+            key={value}
+            href={`#/${label.toLowerCase()}`}
+            className={classNames('filter__link', {
+              selected: filter === value,
+            })}
+            data-cy={`FilterLink${label}`}
+            data-filter={value}
+            onClick={handleFilterClick}
+          >
+            {label}
+          </a>
+        ))}
       </nav>
 
       {/* this button should be disabled if there are no completed todos */}

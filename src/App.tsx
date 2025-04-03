@@ -8,8 +8,7 @@ import callError from './utils/callError';
 import { MainContext } from './ContextProvider/ContextProvider';
 
 export const App: React.FC = () => {
-  const context = useContext(MainContext);
-  const { todos, setTodos, setError, error } = context;
+  const { todos, setTodos, setError, error } = useContext(MainContext);
 
   useEffect(() => {
     getTodos()

@@ -11,24 +11,23 @@ import { addTodo, USER_ID } from '../../api/todos';
 import { MainContext } from '../../ContextProvider/ContextProvider';
 
 const Header: React.FC = ({}) => {
-  const context = useContext(MainContext);
   const { todos, setTodos, setError, loadingIds, setLoadingIds, setTempTodo } =
-    context;
+    useContext(MainContext);
 
   const [todoInputValue, setTodoInputValue] = useState('');
   const [isDisabled, setIsDisabled] = useState(false);
 
-  const focusedInput = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const isAllActive = todos.every(todo => todo.completed);
 
   useEffect(() => {
-    if (focusedInput.current) {
-      const input = focusedInput.current as HTMLElement;
+    if (inputRef.current) {
+      const input = inputRef.current as HTMLElement;
 
       input.focus();
     }
-  }, [isDisabled, todos]);
+  }, [todos]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -37,6 +36,10 @@ const Header: React.FC = ({}) => {
 
     if (!todoTitle.length) {
       callError(setError, 'emptyTitle');
+
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
 
       return;
     }
@@ -60,10 +63,18 @@ const Header: React.FC = ({}) => {
       .catch(() => {
         setTempTodo(null);
         callError(setError, 'add');
+
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
       })
       .finally(() => {
         setLoadingIds([0]);
         setIsDisabled(false);
+
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 0);
       });
   };
 
@@ -84,7 +95,7 @@ const Header: React.FC = ({}) => {
           className="todoapp__new-todo"
           placeholder="What needs to be done?"
           disabled={isDisabled}
-          ref={focusedInput}
+          ref={inputRef}
           value={todoInputValue}
           onChange={event => setTodoInputValue(event?.target.value)}
         />

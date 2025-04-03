@@ -4,8 +4,7 @@ import { getFiltredTodoList } from '../Footer/service';
 import { MainContext } from '../../ContextProvider/ContextProvider';
 
 const TodoList: React.FC = () => {
-  const context = useContext(MainContext);
-  const { todos, filter, tempTodo } = context;
+  const { todos, filter, tempTodo } = useContext(MainContext);
 
   const filtredTodoList = tempTodo
     ? [...getFiltredTodoList(filter, todos), tempTodo]

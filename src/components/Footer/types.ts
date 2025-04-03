@@ -1,4 +1,5 @@
-export type Filter =
-  | 'FilterLinkAll'
-  | 'FilterLinkActive'
-  | 'FilterLinkCompleted';
+export enum Filter {
+  FilterLinkAll = 'FilterLinkAll',
+  FilterLinkActive = 'FilterLinkActive',
+  FilterLinkCompleted = 'FilterLinkCompleted',
+}
